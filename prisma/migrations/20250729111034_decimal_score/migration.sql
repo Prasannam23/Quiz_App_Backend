@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Answer" ALTER COLUMN "marksScored" SET DATA TYPE DECIMAL(65,30);
+
+-- AlterTable
+ALTER TABLE "Attempt" ALTER COLUMN "score" SET DATA TYPE DECIMAL(65,30);

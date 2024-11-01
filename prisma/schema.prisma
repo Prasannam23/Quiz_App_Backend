@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+  SUPERADMIN
+}
+
+model User {
+  id         String    @id @default(cuid())
+  email      String    @unique
+  password   String?   
+  googleId   String?   @unique 
+  role       Role     @default(STUDENT)  
+  firstName  String?
+  lastName   String?
+  avatar     String?   
+  phone      String?   @unique
+  address    String?   
+  createdAt  DateTime  @default(now())
+
+  
+  quizzes    Quiz[]    
+  attempts   Attempt[] 
+}
+
+enum State {
+  yet_to_start
+  ongoing
+  completed
+}
+
+model Quiz {
+  id         String     @id @default(cuid())
+  title      String
+  slug       String     @unique
+  joinCode   String     @unique
+  state      State?     @default(yet_to_start)
+  
+  ownerId    String
+  owner      User       @relation(fields: [ownerId], references: [id])
+
+  questions  Question[]
+  attempts   Attempt[]
+
+  maxScore   Int
+  createdAt  DateTime   @default(now())
+}
+
+model Question {
+  id          String    @id @default(cuid())
+  question    String
+  options     String[]  
+  answerIndex Int       
+  marks       Int       
+  timeLimit   Int       
+  quizId      String
+  quiz        Quiz      @relation(fields: [quizId], references: [id]) 
+  answers     Answer[]  
+}
+
+model Attempt {
+  id          String     @id @default(cuid())
+
+  userId      String
+  quizId      String
+  score       Decimal       
+  startedAt   DateTime?
+  completedAt DateTime?
+  roomId      String?
+  state       State?     @default(yet_to_start) 
+  user        User       @relation(fields: [userId], references: [id]) 
+  quiz        Quiz       @relation(fields: [quizId], references: [id]) 
+
+  answers     Answer[]  
+  questionStartedAt DateTime?
+  answeredAt        DateTime?
+
+}
+
+model Answer {
+  id           String     @id @default(cuid())
+
+  attemptId    String
+  questionId   String
+  selected     Int       
+  isCorrect    Boolean
+  timeTaken    Int        
+  marksScored  Decimal        
+
+  attempt      Attempt    @relation(fields: [attemptId], references: [id]) 
+  question     Question   @relation(fields: [questionId], references: [id]) 
+}
