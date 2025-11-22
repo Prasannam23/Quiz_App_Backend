@@ -20,13 +20,17 @@ import { connectRedis } from './config/redis';
 dotenv.config();
 
 const app = express();
+const allowedOrigins = [
+  "https://quizbee-frontend-htsh.vercel.app",
+  "http://localhost:3000"
+];
 export const server = http.createServer(app); 
 
 
 export async function initializeWorkerApp() {
   try {
     app.use(cors({
-      origin: "https://quizbee-frontend-htsh.vercel.app/",
+      origin: allowedOrigins,
       credentials: true,
     }));
     app.use(express.json());
