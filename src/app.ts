@@ -30,9 +30,11 @@ export const server = http.createServer(app);
 export async function initializeWorkerApp() {
   try {
     app.use(cors({
-      origin: allowedOrigins,
-      credentials: true,
-    }));
+  origin: allowedOrigins,
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE']
+}));
     app.use(express.json());
     app.use(cookieParser());
     app.use(session({
