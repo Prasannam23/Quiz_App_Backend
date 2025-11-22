@@ -58,16 +58,23 @@ export async function initializeWorkerApp() {
       const used = process.memoryUsage().heapUsed / 1024 / 1024;
       console.log(`[PID ${process.pid}] Memory usage: ${Math.round(used * 100) / 100} MB`);
     }, 10000);
+    
 
+    app.get("/api/health", (req: Request, res : Response) => {res.send("OK")}
+  );
     app.get('/', (_req: Request, res: Response) => {
       res.send('🧠 Quiz App Backend is running!');
     });
+   
+
+
     app.use('/api/auth', authRoutes);
     app.use('/api/auth', googleAuthRoutes);
     app.use('/api/user', userRoutes);
     app.use('/api/quiz', quizRoutes);
     app.use("/api/redis", redisQuizRoutes)
-
+    app.use("/api/quiz", quizRoutes);
+    
     startWebSocketServer(server);
 
     // const PORT = process.env.PORT || 8000;
