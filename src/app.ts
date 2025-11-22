@@ -66,10 +66,15 @@ export async function initializeWorkerApp() {
 
     startWebSocketServer(server);
 
-    const PORT = process.env.PORT || 8000;
-    server.listen(PORT, () => {
-      console.log(`Worker ${process.pid} running on http://localhost:${PORT}`);
-    });
+    // const PORT = process.env.PORT || 8000;
+    // server.listen(PORT, () => {
+    //   console.log(`Worker ${process.pid} running on http://localhost:${PORT}`);
+    // });
+    const PORT = Number(process.env.PORT) || 8000;
+    server.listen(PORT, "0.0.0.0", () => {
+  console.log("Server running on http://0.0.0.0:8000");
+});
+
     await connectRedis();
   } catch (error) {
     console.error(`Worker ${process.pid}: Error during app initialization:`, error);
