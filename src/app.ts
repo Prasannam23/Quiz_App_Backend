@@ -26,7 +26,7 @@ export const server = http.createServer(app);
 export async function initializeWorkerApp() {
   try {
     app.use(cors({
-      origin: "https://quizbee-frontend-htsh-1ltnikdip-prasannam23s-projects.vercel.app/",
+      origin: "https://quizbee-frontend-htsh.vercel.app/",
       credentials: true,
     }));
     app.use(express.json());
