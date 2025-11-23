@@ -5,9 +5,9 @@ import { hashPassword, comparePassword } from '../util/hash';
 import { generateToken } from '../util/jwt';
 
 const COOKIE_OPTIONS: CookieOptions = {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none',
+     httpOnly: false, // frontend can read
+  sameSite: 'none', // allow cross-origin POSTs
+  secure: process.env.NODE_ENV === 'production', // must be HTTPS in prod
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
