@@ -3,7 +3,6 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import session from "express-session";
 import passport from "passport";
 import prisma from "./config/db";
 import http from "http";
@@ -22,22 +21,15 @@ dotenv.config();
 const app = express();
 export const server = http.createServer(app);
 
-// ================================
-// ALLOWED ORIGINS
-// ================================
 const allowedOrigins = [
   "https://quizbee-frontend-htsh.vercel.app",
   "http://localhost:3000",
 ];
 
-// ================================
-// TRUST NGINX PROXY FOR HTTPS COOKIE HANDLING
-// ================================
+// Trust NGINX reverse proxy
 app.set("trust proxy", 1);
 
-// ================================
-// CORS CONFIG
-// ================================
+// CORS
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -49,33 +41,18 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Set-Cookie"],
   })
 );
 
-// ================================
 app.use(express.json());
 app.use(cookieParser());
 
-// ================================
-// SESSION + PASSPORT
-// ================================
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "keyboard cat",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: true,           // Required for HTTPS
-      httpOnly: true,
-      sameSite: "none",       // Required for cross-domain cookies
-    },
-  })
-);
-
+// Passport (without sessions)
 app.use(passport.initialize());
-app.use(passport.session());
+import "./google/strategies/google";
 
+// Serialize / deserialize
 passport.serializeUser((user: any, done) => done(null, user.id));
 passport.deserializeUser(async (id: string, done) => {
   try {
@@ -86,9 +63,7 @@ passport.deserializeUser(async (id: string, done) => {
   }
 });
 
-// ================================
-// ROUTES
-// ================================
+// Routes
 app.get("/api/health", (_req: Request, res: Response) => {
   res.send("OK");
 });
@@ -103,20 +78,14 @@ app.use("/api/user", userRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/redis", redisQuizRoutes);
 
-// ================================
-// START WEBSOCKET SERVER
-// ================================
+// Start websocket server
 startWebSocketServer(server);
 
-// ================================
-// START SERVER
-// ================================
+// Start backend server
 const PORT = Number(process.env.PORT) || 8000;
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running at http://0.0.0.0:${PORT}`);
 });
 
-// ================================
-// CONNECT REDIS
-// ================================
+// Connect Redis
 connectRedis();
