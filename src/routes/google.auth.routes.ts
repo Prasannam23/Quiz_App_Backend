@@ -8,7 +8,7 @@ const router = Router();
 
 const COOKIE_OPTIONS: CookieOptions = {
 
-  httpOnly: false,                         // allow frontend JS to read token
+  httpOnly: true,                         // allow frontend JS to read token
   secure: process.env.NODE_ENV === 'production', // HTTPS only in production
   sameSite: 'none',                         // allow cross-origin POST/GET
   maxAge: 7 * 24 * 60 * 60 * 1000,         // 7 days
