@@ -38,7 +38,7 @@ router.get(
     const user = req.user as AuthUser | undefined;
 
     if (!user) {
-      return res.redirect('http://localhost:3000/login?error=OAuthFailed');
+      return res.redirect('https://quizbee-frontend-htsh.vercel.app/login?error=OAuthFailed');
     }
    
 
@@ -46,7 +46,7 @@ router.get(
     res.cookie('token', token, COOKIE_OPTIONS);
     console.log("////////////1")
     const redirectPath = user.role === 'STUDENT' ? '/student' : '/dashboard';
-    return res.redirect(`http://localhost:3000${redirectPath}`);
+    return res.redirect(`https://quizbee-frontend-htsh.vercel.app${redirectPath}`);
   }
 );
 
