@@ -1,12 +1,11 @@
 // src/app.ts
 import express, { Request, Response } from "express";
+import http from "http";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import prisma from "./config/db";
-import http from "http";
-
 import { startWebSocketServer } from "./websocket/ws.server";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
@@ -17,40 +16,46 @@ import "./google/strategies/google";
 import { connectRedis } from "./config/redis";
 
 dotenv.config();
+console.log("✅ Environment variables loaded");
 
-const app = express();
+// Create Express app and HTTP server
+export const app = express();
 export const server = http.createServer(app);
+console.log("✅ Express app and HTTP server created");
+
+// Middleware
+app.set("trust proxy", 1);
+console.log("✅ Trust proxy enabled");
 
 const allowedOrigins = [
   "https://quizbee-frontend-htsh.vercel.app",
   "http://localhost:3000",
 ];
 
-// Trust NGINX reverse proxy
-app.set("trust proxy", 1);
-
-// CORS
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
+      if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+      else callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Set-Cookie"],
   })
 );
+console.log("✅ CORS configured");
 
 app.use(express.json());
 app.use(cookieParser());
+console.log("✅ Body parser + Cookie parser enabled");
 
-// Passport (without sessions)
+// Passport setup
 app.use(passport.initialize());
+console.log("✅ Passport initialized");
+
+// Google OAuth strategy
 import "./google/strategies/google";
+console.log("✅ Google OAuth strategy loaded");
 
 // Serialize / deserialize
 passport.serializeUser((user: any, done) => done(null, user.id));
@@ -62,30 +67,49 @@ passport.deserializeUser(async (id: string, done) => {
     done(err, null);
   }
 });
+console.log("✅ Passport serialization setup completed");
 
-// Routes
+// Health check route
 app.get("/api/health", (_req: Request, res: Response) => {
+  console.log("🩺 Health check requested");
   res.send("OK");
 });
 
+// Root route
 app.get("/", (_req: Request, res: Response) => {
+  console.log("🏠 Root route requested");
   res.send("🧠 Quiz App Backend is running!");
 });
 
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/auth", googleAuthRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/redis", redisQuizRoutes);
+console.log("✅ All API routes loaded");
 
-// Start websocket server
-startWebSocketServer(server);
+// Exported function to initialize app and dependencies (for workers)
+export async function initializeWorkerApp() {
+  console.log(`👷 Worker ${process.pid} initializing...`);
 
-// Start backend server
-const PORT = Number(process.env.PORT) || 8000;
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running at http://0.0.0.0:${PORT}`);
-});
+  // Connect Redis
+  try {
+    await connectRedis();
+    console.log("✅ Redis connected successfully");
+  } catch (err) {
+    console.error("❌ Redis connection failed:", err);
+    throw err;
+  }
 
-// Connect Redis
-connectRedis();
+  // Start WebSocket server
+  try {
+    startWebSocketServer(server);
+    console.log("✅ WebSocket server started");
+  } catch (err) {
+    console.error("❌ WebSocket server failed to start:", err);
+    throw err;
+  }
+
+  return { app, server };
+}

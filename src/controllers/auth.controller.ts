@@ -3,15 +3,13 @@ import prisma from "../config/db";
 import { hashPassword, comparePassword } from "../util/hash";
 import { generateToken } from "../util/jwt";
 
-const COOKIE_OPTIONS: CookieOptions = {
-  httpOnly: true,
-  secure: true, // must be https
-  sameSite: "none",
-  domain: "quizappbackend.duckdns.org",
+export const COOKIE_OPTIONS: CookieOptions = {
+  httpOnly: true,         // Cookie cannot be accessed by JS (more secure)
+  secure: true,           // Cookie only sent over HTTPS
+  sameSite: "none",       // Required for cross-origin cookies
   path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
 };
-
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, role } = req.body;
@@ -39,6 +37,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     res.status(201).json({
       message: "Registered successfully",
       user: { id: user.id, email: user.email, role: user.role },
+      token,
     });
   } catch (error) {
     console.error("Register error:", error);
@@ -80,6 +79,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({
       message: "Login successful",
       user: { id: user.id, email: user.email, role: user.role },
+      token,
     });
   } catch (error) {
     console.error("Login error:", error);
