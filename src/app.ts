@@ -28,7 +28,7 @@ app.set("trust proxy", 1);
 console.log("✅ Trust proxy enabled");
 
 const allowedOrigins = [
-  "https://quizbee-frontend-htsh.vercel.app",
+  "https://quizbee-frontend-hw1y4b2rl-prasannam23s-projects.vercel.app",
   "http://localhost:3000",
 ];
 
@@ -43,6 +43,9 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization", "Set-Cookie"],
   })
 );
+
+// Handle preflight requests explicitly
+app.options("*", cors());
 console.log("✅ CORS configured");
 
 app.use(express.json());
@@ -95,6 +98,7 @@ export async function initializeWorkerApp() {
 
   // Connect Redis
   try {
+    console.log("🔄 Attempting to connect to Redis...");
     await connectRedis();
     console.log("✅ Redis connected successfully");
   } catch (err) {
@@ -104,6 +108,7 @@ export async function initializeWorkerApp() {
 
   // Start WebSocket server
   try {
+    console.log("🔄 Starting WebSocket server...");
     startWebSocketServer(server);
     console.log("✅ WebSocket server started");
   } catch (err) {
@@ -111,5 +116,6 @@ export async function initializeWorkerApp() {
     throw err;
   }
 
+  console.log("✅ Worker initialization complete!");
   return { app, server };
 }

@@ -8,7 +8,7 @@ const numCPUs = os.cpus().length;
 if (cluster.isPrimary) {
   console.log(`🟢 Primary process ${process.pid} is running`);
   
-  // Start keep-alive pinger for Render free tier
+ 
   startKeepAlive();
   
   for (let i = 0; i < 3; i++) cluster.fork();
