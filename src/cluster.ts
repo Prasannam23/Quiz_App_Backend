@@ -18,10 +18,15 @@ if (cluster.isPrimary) {
     cluster.fork();
   });
 } else {
-  initializeWorkerApp().then(({ server }) => {
-    const PORT = Number(process.env.PORT) || 8000;
-    server.listen(PORT, "0.0.0.0", () =>
-      console.log(`🚀 Worker ${process.pid} server running at http://0.0.0.0:${PORT}`)
-    );
-  });
+  initializeWorkerApp()
+    .then(({ server }) => {
+      const PORT = Number(process.env.PORT) || 8000;
+      server.listen(PORT, "0.0.0.0", () =>
+        console.log(`🚀 Worker ${process.pid} server running at http://0.0.0.0:${PORT}`)
+      );
+    })
+    .catch((err) => {
+      console.error(`❌ Worker ${process.pid} failed to initialize:`, err);
+      process.exit(1);
+    });
 }
