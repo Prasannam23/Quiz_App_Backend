@@ -12,8 +12,8 @@ import userRoutes from "./routes/user.routes";
 import googleAuthRoutes from "./routes/google.auth.routes";
 import quizRoutes from "./routes/quiz.routes";
 import redisQuizRoutes from "./routes/redis.quiz.routes";
-import "./google/strategies/google";
 import { connectRedis } from "./config/redis";
+import "./google/strategies/google";
 
 dotenv.config();
 console.log("✅ Environment variables loaded");
@@ -52,15 +52,7 @@ app.use(express.json());
 app.use(cookieParser());
 console.log("✅ Body parser + Cookie parser enabled");
 
-// Passport setup
-app.use(passport.initialize());
-console.log("✅ Passport initialized");
-
-// Google OAuth strategy
-import "./google/strategies/google";
-console.log("✅ Google OAuth strategy loaded");
-
-// Serialize / deserialize
+// Serialize / deserialize (must be before passport.initialize)
 passport.serializeUser((user: any, done) => done(null, user.id));
 passport.deserializeUser(async (id: string, done) => {
   try {
@@ -71,6 +63,10 @@ passport.deserializeUser(async (id: string, done) => {
   }
 });
 console.log("✅ Passport serialization setup completed");
+
+// Passport setup
+app.use(passport.initialize());
+console.log("✅ Passport initialized");
 
 // Health check route
 app.get("/api/health", (_req: Request, res: Response) => {
