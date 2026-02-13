@@ -28,7 +28,7 @@ app.set("trust proxy", 1);
 console.log("✅ Trust proxy enabled");
 
 const allowedOrigins = [
-  "https://quizbee-frontend-hw1y4b2rl-prasannam23s-projects.vercel.app",
+  "https://quizbee-frontend-htsh.vercel.app/",
   "http://localhost:3000",
 ];
 
