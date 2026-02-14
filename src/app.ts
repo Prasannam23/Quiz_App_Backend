@@ -28,14 +28,17 @@ app.set("trust proxy", 1);
 console.log("✅ Trust proxy enabled");
 
 const allowedOrigins = [
-  "https://quizbee-frontend-htsh.vercel.app/",
+  "https://quizbee-frontend-htsh.vercel.app",
   "http://localhost:3000",
 ];
 
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    if (!origin || allowedOrigins.includes(origin)) callback(null, true);
-    else callback(new Error("Not allowed by CORS"));
+    if (!origin) return callback(null, true);
+    // Allow configured origins, plus any frontends hosted on Vercel
+    const isAllowed = allowedOrigins.includes(origin) || origin.includes(".vercel.app");
+    if (isAllowed) return callback(null, true);
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
